@@ -19,6 +19,7 @@ var snowflakes = {
 
 	flakes: [],
 	flakeContainer: null,
+	flakeImage: null,
 
 	time: {
 		start: null,
@@ -42,40 +43,59 @@ var snowflakes = {
 	randomizeFlake: function(flake) {
 		flake.velocity = (this.params.Velocity -this.params.VelocityVariation + Math.random()*(2*this.params.VelocityVariation))/this.params.VelocityFactor;
 		flake.size = (this.params.Size-this.params.SizeVariation) + Math.random()*(2 * this.params.SizeVariation);
-		flake.style.width = flake.size + "px";
-		flake.style.height = flake.size + "px";
-		flake.style.left = this.flakeContainer.clientWidth * Math.random() + "px";
-		flake.style.top = (-1 * (this.params.Size + this.params.SizeVariation) - Math.random()*100) + "px";
-		console.log(flake.style.top);
-		flake.style.transform = "rotate(" + (60 * Math.random()) + "deg)";
+		flake.width = flake.size;
+		flake.height = flake.size;
+		flake.left = document.body.clientWidth * Math.random();
+		flake.top = (-1 * (this.params.Size + this.params.SizeVariation) - Math.random()*100);
+		//console.log(flake.top);
+		//flake.transform = "rotate(" + (60 * Math.random()) + "deg)";
+		flake.rotate = 60 * Math.random();
 	},
 
 	init: function() {
-		this.flakeContainer = document.createElement("div");
+		this.flakeContainer = document.createElement("canvas");
 		this.flakeContainer.className = "snowflakes";
+		console.log(document.body.clientHeight + "px");
 
 		document.body.appendChild(this.flakeContainer);
+		this.flakeContainer.width = document.body.clientWidth;
+		this.flakeContainer.height = document.body.clientHeight;
 
 		this.flakes = [];
 
+		this.flakeImage = new Image();
+		this.flakeImage.src = "flake.svg";
+
 		for(var i=0;i<this.params.FlakeNumber;i++)
 		{
-			var flake = document.createElement("div");
+			var flake = new Object();
 
 			this.randomizeFlake(flake);
 
 			var top = Math.random() * this.flakeContainer.clientHeight;//(-1 * this.params.SizeMax - Math.random() * this.flakeContainer.clientHeight);
 
-			flake.style.top = top + "px";
+			flake.top = top;
 
 			flake.innerHTML = this.flakeStyles[this.params.FlakeStyle];
 			this.flakes.push(flake);
-			this.flakeContainer.appendChild(flake);
+
+			//this.flakeContainer.appendChild(flake);
 		}
 
 		this.flakeContainer.style.opacity = 1;
 
 		window.requestAnimationFrame(snowflakes.nextFrame);
+	},
+
+	drawFlake: function(flake) {
+		var ctx = snowflakes.flakeContainer.getContext("2d");
+		ctx.save();
+		ctx.translate(flake.left,flake.top);
+		ctx.translate(flake.size/2,flake.size/2);
+		ctx.rotate(flake.rotate / Math.PI);
+		console.log(flake.size);
+		ctx.drawImage(snowflakes.flakeImage,0,0,flake.size,flake.size);
+		ctx.restore();
 	},
 
 	nextFrame: function(currentTime) {
@@ -87,24 +107,31 @@ var snowflakes = {
   		var delta = currentTime - time.last;
 
 
+  		var ctx = snowflakes.flakeContainer.getContext("2d");
+  		ctx.clearRect(0,0,parseInt(snowflakes.flakeContainer.width),parseInt(snowflakes.flakeContainer.height));
+
   		var log = document.getElementById("log");
   		if(parseInt(delta)!=0){
 			log.innerHTML = parseInt(1000/parseInt(delta)) + " FPS<br/>";
   		}
 
   		for(var i =0;i<snowflakes.flakes.length;i++) {
-  			//log.innerHTML +=  i + " " + snowflakes.flakes[i].velocity + " " + (parseInt(snowflakes.flakes[i].style.top) + snowflakes.flakes[i].velocity * delta) + "<br/>";
-  			var top = (parseFloat(snowflakes.flakes[i].style.top) + snowflakes.flakes[i].velocity * delta);
+  			//log.innerHTML +=  i + " " + snowflakes.flakes[i].velocity + " " + (parseInt(snowflakes.flakes[i].top) + snowflakes.flakes[i].velocity * delta) + "<br/>";
+  			var top = (parseFloat(snowflakes.flakes[i].top) + snowflakes.flakes[i].velocity * delta);
   			//console.log( snowflakes.windDirection());
-  			var left = (parseFloat(snowflakes.flakes[i].style.left) + snowflakes.params.WindVelocity * delta / snowflakes.params.VelocityFactor * (0.5 + 0.5 * Math.random()) * snowflakes.windDirection());
+  			var left = (parseFloat(snowflakes.flakes[i].left) + snowflakes.params.WindVelocity * delta / snowflakes.params.VelocityFactor * (0.5 + 0.5 * Math.random()) * snowflakes.windDirection());
 
-  			if(top<= snowflakes.flakeContainer.clientHeight){
-	  			snowflakes.flakes[i].style.top = top + "px";
-	  			snowflakes.flakes[i].style.left = left + "px";
+
+  			if(top<= document.body.clientHeight){
+	  			snowflakes.flakes[i].top = top;
+	  			snowflakes.flakes[i].left = left;
   			}
 	  		else{
 	  			snowflakes.randomizeFlake(snowflakes.flakes[i]);
 	  		}
+
+
+	  		snowflakes.drawFlake(snowflakes.flakes[i])
   		}
 
 1

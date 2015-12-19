@@ -1,4 +1,4 @@
-div.snowflakes {
+canvas.snowflakes {
 	pointer-events: none;
 	position:fixed;
 	height:100%;
