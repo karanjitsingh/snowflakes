@@ -1,0 +1,19 @@
+div.snowflakes {
+	pointer-events: none;
+	position:fixed;
+	height:100%;
+	width:100%;
+	left:0px;
+	top:0px;
+	opacity: 0;
+	transition: opacity 0.5s ease-out;
+}
+
+div.snowflakes div {
+	position: absolute;
+}
+
+div.snowflakes div svg{
+	height:100%;
+	width:100%;
+}
