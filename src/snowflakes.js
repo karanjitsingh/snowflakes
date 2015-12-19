@@ -1,6 +1,6 @@
 var snowflakes = {
 	params: {
-		FlakeNumber: 10,
+		FlakeNumber: 30,
 		Size: 20,
 		SizeVariation: 10,
 		Velocity: 8,
