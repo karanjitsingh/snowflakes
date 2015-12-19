@@ -88,7 +88,9 @@ var snowflakes = {
 
 
   		var log = document.getElementById("log");
-		log.innerHTML = delta + "<br/>";
+  		if(parseInt(delta)!=0){
+			log.innerHTML = parseInt(1000/parseInt(delta)) + " FPS<br/>";
+  		}
 
   		for(var i =0;i<snowflakes.flakes.length;i++) {
   			//log.innerHTML +=  i + " " + snowflakes.flakes[i].velocity + " " + (parseInt(snowflakes.flakes[i].style.top) + snowflakes.flakes[i].velocity * delta) + "<br/>";
