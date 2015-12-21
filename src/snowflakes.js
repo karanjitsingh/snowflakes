@@ -47,18 +47,28 @@ var snowflakes = {
 	init: function() {
 		if(this.state != "")
 			return;
-		this.flakeContainer = document.createElement("canvas");
-		this.flakeContainer.className = "snowflakes";
 
-		document.body.appendChild(this.flakeContainer);
+		this.flakeContainer = document.getElementsByClassName("snowflakes")[0];
+
+		if(!this.flakeContainer || this.flakeContainer.tagName != "CANVAS") {
+			this.flakeContainer = document.createElement("canvas");
+			this.flakeContainer.className = "snowflakes";
+			document.body.appendChild(this.flakeContainer);
+		}
+		
 		this.flakeContainer.width = document.body.clientWidth;
 		this.flakeContainer.height = document.body.clientHeight;
 
 		this.flakes = [];
-
 		this.flakeImage = new Image();
-		this.flakeImage.src = "flake.svg";
+		this.flakeImage.loaded = false; 
 
+
+		this.flakeImage.onload = function() {
+			snowflakes.flakeImage.loaded = true;
+		}
+
+		this.flakeImage.src = "flake.svg";
 		for(var i=0;i<this.params.FlakeNumber;i++)
 		{
 			var flake = new Object();
@@ -82,6 +92,7 @@ var snowflakes = {
 	nextFrame: function(currentTime) {
 		if(snowflakes.state != "running")
 			return;
+
 		var time = snowflakes.time;
 		if(!time.start){time.start=currentTime;}
 			if(!time.last){time.last=currentTime;}
@@ -128,9 +139,20 @@ var snowflakes = {
 
 	start: function() {
 		this.init();
-		this.flakeContainer.style.opacity = 1;
-		window.requestAnimationFrame(snowflakes.nextFrame);
-		this.state="running";
+		if(this.flakeImage && this.flakeImage.loaded) {
+			this.flakeContainer.style.opacity = 1;
+			this.state="running";
+			window.requestAnimationFrame(snowflakes.nextFrame);
+		}
+		else if(this.flakeImage) {
+			this.state = "waitingForSvg";
+			this.flakeImage.onload = function() {
+				snowflakes.flakeImage.loaded = true;
+				snowflakes.flakeContainer.style.opacity = 1;
+				snowflakes.state="running";
+				window.requestAnimationFrame(snowflakes.nextFrame);
+			}
+		}
 	},
 
 	randomizeAllFlakes: function() {
