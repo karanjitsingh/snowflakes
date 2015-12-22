@@ -56,8 +56,13 @@ var snowflakes = {
 			document.body.appendChild(this.flakeContainer);
 		}
 		
+		this.flakeContainer.style.opacity = 0;
+		this.flakeContainer.style.display = "none";
 		this.flakeContainer.width = document.body.clientWidth;
 		this.flakeContainer.height = document.body.clientHeight;
+
+		//Just in case CSS `pointer-event: none;` doesn't work this is a fallback option so that the site remains functional 
+		this.flakeContainer.onclick = snowflakes.stop;
 
 		this.flakes = [];
 
@@ -73,7 +78,7 @@ var snowflakes = {
 		{
 			var flake = new Object();
 			this.randomizeFlake(flake);
-			flake.y = Math.random() * this.flakeContainer.clientHeight;
+			flake.y = Math.random() * this.flakeContainer.height;
 			this.flakes.push(flake);
 		}
 		this.state = "initialized";
@@ -122,12 +127,18 @@ var snowflakes = {
 	},
 
 	stop: function() {
-		this.flakeContainer.style.opacity = 0;
-		setTimeout('snowflakes.state = "stopped"', 500);
+		snowflakes.flakeContainer.style.opacity = 0;
+		setTimeout(snowflakes.stopCallback, 500);
+	},
+
+	stopCallback: function() {
+		snowflakes.state = "stopped";
+		snowflakes.flakeContainer.style.display = "none";
 	},
 
 	start: function() {
 		this.init();
+		this.flakeContainer.style.display = "initial";
 		if(this.flakeImage && this.flakeImage.loaded) {
 			this.flakeContainer.style.opacity = 1;
 			this.state="running";
