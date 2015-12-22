@@ -60,16 +60,16 @@ var snowflakes = {
 		this.flakeContainer.height = document.body.clientHeight;
 
 		this.flakes = [];
+
 		this.flakeImage = new Image();
 		this.flakeImage.loaded = false; 
-
 
 		this.flakeImage.onload = function() {
 			snowflakes.flakeImage.loaded = true;
 		}
 
 		this.flakeImage.src = "flake.svg";
-		for(var i=0;i<this.params.FlakeNumber;i++)
+		for(var i=0; i<this.params.FlakeNumber; i++)
 		{
 			var flake = new Object();
 			this.randomizeFlake(flake);
@@ -100,35 +100,24 @@ var snowflakes = {
 
 		var delta = currentTime - time.last;
 
-
 		var ctx = snowflakes.flakeContainer.getContext("2d");
 		ctx.clearRect(0,0,parseInt(snowflakes.flakeContainer.width),parseInt(snowflakes.flakeContainer.height));
-
-		var log = document.getElementById("log");
-		if(parseInt(delta)!=0){
-			log.innerHTML = parseInt(1000/parseInt(delta)) + " FPS<br/>";
-		}
 
 		for(var i =0;i<snowflakes.flakes.length;i++) {
 			var top = (parseFloat(snowflakes.flakes[i].y) + snowflakes.flakes[i].velocity * delta);
 			var left = (parseFloat(snowflakes.flakes[i].x) + snowflakes.params.WindVelocity * delta / snowflakes.params.VelocityFactor * (0.5 + 0.5 * Math.random()) * snowflakes.windDirection());
 
-
 			if(top<= document.body.clientHeight){
 				snowflakes.flakes[i].y = top;
 				snowflakes.flakes[i].x = left;
 			}
-			else{
+			else
 				snowflakes.randomizeFlake(snowflakes.flakes[i]);
-			}
-
 
 			snowflakes.drawFlake(snowflakes.flakes[i]);
 		}
 
-
 		time.last = currentTime;
-
 		window.requestAnimationFrame(snowflakes.nextFrame);
 	},
 
@@ -164,7 +153,4 @@ var snowflakes = {
 			flake.y = top;
 		}
 	}
-
-
-
 }
