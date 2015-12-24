@@ -15,13 +15,13 @@ var snowflakes = {
 		WindVelocity: 4,
 		WindVariation: 4,
 		WindSwingTime: 4000,
-		FlakeImageUrl: "flake.svg",
-		parent: null
+		parent: null,
+		FlakeImageUrls: ["flake.svg", "flakeRed.svg"]
 	},
 
 	flakes: [],
 	flakeContainer: null,
-	flakeImage: null,
+	flakeImages: null,
 
 	state: "",
 
@@ -52,6 +52,9 @@ var snowflakes = {
 		flake.size = (this.params.Flakes.Size-this.params.Flakes.SizeVariation) + Math.random()*(2 * this.params.Flakes.SizeVariation);
 		flake.x = this.params.parent.clientWidth * Math.random();
 		flake.angularVelocity = (this.params.Flakes.AngularVelocity -this.params.Flakes.AngularVariation + Math.random()*(2*this.params.Flakes.AngularVariation))/this.params.Flakes.AngularFactor  * (Math.random()<=0.5?-1:1);
+		
+		flake.url = this.flakeImages[parseInt(Math.random() * this.flakeImages.length)];	
+
 		//Keep the flake above client window. Keeps flake from randomly popping on screen when randomized
 		flake.y = (-1 * (this.params.Flakes.Size + this.params.Flakes.SizeVariation) - Math.random()*100);
 		flake.rotate = 60 * Math.random();
@@ -84,14 +87,30 @@ var snowflakes = {
 
 		this.flakes = [];
 
-		this.flakeImage = new Image();
-		this.flakeImage.loaded = false; 
+		this.flakeImages = [];
+		this.flakeImages.onload = function(){};
+		this.flakeImages.loaded = 0;
 
-		this.flakeImage.onload = function() {
-			snowflakes.flakeImage.loaded = true;
+		console.log()
+
+		for(var url of this.params.FlakeImageUrls) {
+			
+			var image = new Image();
+
+			image.onload = function(){
+				if(++snowflakes.flakeImages.loaded == snowflakes.flakeImages.length){
+					snowflakes.flakeImages.loaded = true;
+					snowflakes.flakeImages.onload();
+				}
+
+			}
+
+			image.src = url;
+
+			this.flakeImages.push(image);
 		}
 
-		this.flakeImage.src = this.params.FlakeImageUrl;
+		
 		for(var i=0; i<this.params.Flakes.Count; i++)
 		{
 			var flake = new Object();
@@ -112,7 +131,7 @@ var snowflakes = {
 		ctx.translate(flake.x,flake.y);
 		ctx.translate(flake.size/2,flake.size/2);
 		ctx.rotate(flake.rotate / Math.PI);
-		ctx.drawImage(snowflakes.flakeImage,-flake.size/2,-flake.size/2,flake.size,flake.size);
+		ctx.drawImage(flake.url,-flake.size/2,-flake.size/2,flake.size,flake.size);
 		ctx.restore();
 	},
 
@@ -173,15 +192,15 @@ var snowflakes = {
 		this.flakeContainer.style.display = "initial";
 
 		//If flake image has loaded then start the animation, else wait for loading to finish
-		if(this.flakeImage && this.flakeImage.loaded) {
+		if(this.flakeImages && this.flakeImages.loaded == true) {
 			this.flakeContainer.style.opacity = 1;
 			this.state="running";
 			window.requestAnimationFrame(snowflakes.nextFrame);
 		}
-		else if(this.flakeImage) {
+		else if(this.flakeImages) {
 			this.state = "waitingForImage";
-			this.flakeImage.onload = function() {
-				snowflakes.flakeImage.loaded = true;
+			this.flakeImages.onload = function() {
+				snowflakes.flakeImages[0].loaded = true;
 				snowflakes.flakeContainer.style.opacity = 1;
 				snowflakes.state="running";
 				window.requestAnimationFrame(snowflakes.nextFrame);
