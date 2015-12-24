@@ -11,7 +11,8 @@ var snowflakes = {
 		WindDirection: "alternate", //["left", "right", "alternate", "none"]
 		WindVelocity: 4,
 		WindSwingTime: 4000,
-		FlakeImageUrl: "flake.svg"
+		FlakeImageUrl: "flake.svg",
+		parent: null
 	},
 
 	flakes: [],
@@ -44,7 +45,7 @@ var snowflakes = {
 		//Velocity is divided by scaling factor for smoothing/scalable units
 		flake.velocity = (this.params.Flakes.Velocity -this.params.Flakes.VelocityVariation + Math.random()*(2*this.params.Flakes.VelocityVariation))/this.params.Flakes.VelocityFactor;
 		flake.size = (this.params.Flakes.Size-this.params.Flakes.SizeVariation) + Math.random()*(2 * this.params.Flakes.SizeVariation);
-		flake.x = document.body.clientWidth * Math.random();
+		flake.x = this.params.parent.clientWidth * Math.random();
 
 		//Keep the flake above client window. Keeps flake from randomly popping on screen when randomized
 		flake.y = (-1 * (this.params.Flakes.Size + this.params.Flakes.SizeVariation) - Math.random()*100);
@@ -55,6 +56,9 @@ var snowflakes = {
 		if(this.state != "")
 			return;
 
+
+		if(this.params.parent == null)
+			this.params.parent = document.body;
 		this.flakeContainer = document.getElementsByClassName("snowflakes")[0];
 
 
@@ -62,13 +66,13 @@ var snowflakes = {
 		if(!this.flakeContainer || this.flakeContainer.tagName != "CANVAS") {
 			this.flakeContainer = document.createElement("canvas");
 			this.flakeContainer.className = "snowflakes";
-			document.body.appendChild(this.flakeContainer);
+			this.params.parent.appendChild(this.flakeContainer);
 		}
 		
 		this.flakeContainer.style.opacity = 0;
 		this.flakeContainer.style.display = "none";
-		this.flakeContainer.width = document.body.clientWidth;
-		this.flakeContainer.height = document.body.clientHeight;
+		this.flakeContainer.width = this.params.parent.clientWidth;
+		this.flakeContainer.height = this.params.parent.clientHeight;
 
 		//Just in case CSS `pointer-event: none;` doesn't work this is a fallback option so that the site remains functional 
 		this.flakeContainer.onclick = snowflakes.stop;
@@ -129,7 +133,7 @@ var snowflakes = {
 			var left = (parseFloat(snowflakes.flakes[i].x) + snowflakes.params.WindVelocity * delta / snowflakes.params.Flakes.VelocityFactor * (0.5 + 0.5 * Math.random()) * snowflakes.windDirection());
 
 			//Check if flake has crossed the bottom, if yes re-randomize flake
-			if(top<= document.body.clientHeight){
+			if(top<= snowflakes.params.parent.clientHeight){
 				snowflakes.flakes[i].y = top;
 				snowflakes.flakes[i].x = left;
 			}
