@@ -6,10 +6,14 @@ var snowflakes = {
 			SizeVariation: 10,
 			Velocity: 8,
 			VelocityVariation: 4,
-			VelocityFactor: 100
+			VelocityFactor: 100,
+			AngularVelocity: 30,
+			AngularVariation: 10,
+			AngularFactor: 30
 		},
 		WindDirection: "alternate", //["left", "right", "alternate", "none"]
 		WindVelocity: 4,
+		WindVariation: 4,
 		WindSwingTime: 4000,
 		FlakeImageUrl: "flake.svg",
 		parent: null
@@ -44,9 +48,10 @@ var snowflakes = {
 		//Random value in [Vmin, Vmax]
 		//Velocity is divided by scaling factor for smoothing/scalable units
 		flake.velocity = (this.params.Flakes.Velocity -this.params.Flakes.VelocityVariation + Math.random()*(2*this.params.Flakes.VelocityVariation))/this.params.Flakes.VelocityFactor;
+		flake.windVelocity = (snowflakes.params.WindVelocity -snowflakes.params.WindVariation + Math.random()*(2*snowflakes.params.WindVariation));
 		flake.size = (this.params.Flakes.Size-this.params.Flakes.SizeVariation) + Math.random()*(2 * this.params.Flakes.SizeVariation);
 		flake.x = this.params.parent.clientWidth * Math.random();
-
+		flake.angularVelocity = (this.params.Flakes.AngularVelocity -this.params.Flakes.AngularVariation + Math.random()*(2*this.params.Flakes.AngularVariation))/this.params.Flakes.AngularFactor;
 		//Keep the flake above client window. Keeps flake from randomly popping on screen when randomized
 		flake.y = (-1 * (this.params.Flakes.Size + this.params.Flakes.SizeVariation) - Math.random()*100);
 		flake.rotate = 60 * Math.random();
@@ -121,6 +126,10 @@ var snowflakes = {
 			if(!time.last){time.last=currentTime;}
 				time.total=(currentTime-time.start);
 
+
+		snowflakes.flakeContainer.width = snowflakes.params.parent.clientWidth;
+		snowflakes.flakeContainer.height = snowflakes.params.parent.clientHeight;
+
 		var delta = currentTime - time.last;
 
 		var ctx = snowflakes.flakeContainer.getContext("2d");
@@ -130,7 +139,9 @@ var snowflakes = {
 
 			//pos = pos + v * delta
 			var top = (parseFloat(snowflakes.flakes[i].y) + snowflakes.flakes[i].velocity * delta);
-			var left = (parseFloat(snowflakes.flakes[i].x) + snowflakes.params.WindVelocity * delta / snowflakes.params.Flakes.VelocityFactor * (0.5 + 0.5 * Math.random()) * snowflakes.windDirection());
+			var left = (parseFloat(snowflakes.flakes[i].x) + snowflakes.flakes[i].windVelocity * delta / snowflakes.params.Flakes.VelocityFactor * (0.5 + 0.5 * Math.random()) * snowflakes.windDirection());
+
+			snowflakes.flakes[i].rotate += snowflakes.flakes[i].angularVelocity * delta;
 
 			//Check if flake has crossed the bottom, if yes re-randomize flake
 			if(top<= snowflakes.params.parent.clientHeight){
